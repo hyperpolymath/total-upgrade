@@ -1,0 +1,213 @@
+= RSR-template-repo Roadmap
+:toc: left
+:toclevels: 2
+:icons: font
+
+== Current State
+
+*Version:* 0.1.0 +
+*Phase:* Template Development +
+*Status:* Foundation established
+
+=== Completed
+
+==== Template Infrastructure
+
+* [x] Justfile with 50+ task recipes
+* [x] CI/CD workflows for GitHub Actions (10 workflows)
+* [x] GitLab CI/CD pipeline configuration
+* [x] EditorConfig for 15+ languages
+* [x] Gitattributes for line endings and binary handling
+
+==== Community Governance
+
+* [x] CODE_OF_CONDUCT.md with perimeter-aware enforcement
+* [x] CONTRIBUTING.md with workflow guidelines
+* [x] SECURITY.md with coordinated disclosure policy
+* [x] LICENSE.txt dual MIT/AGPL-3.0+ template
+* [x] Issue templates (bug, feature, docs, question, custom)
+
+==== Policy Enforcement
+
+* [x] Language antipattern detection (rsr-antipattern.yml)
+* [x] RFC 9116 security.txt validation
+* [x] Guix/Nix package manager policy
+* [x] OpenSSF Scorecard integration
+* [x] CodeQL static analysis
+
+==== Documentation
+
+* [x] README.adoc with comprehensive overview
+* [x] CLAUDE.md AI assistant language policy
+* [x] docs/CITATIONS.adoc citation formats
+
+---
+
+== Roadmap
+
+=== Phase 1: Template Completion
+
+==== Missing RSR Compliance Files
+
+* [ ] Create `.well-known/security.txt` (RFC 9116)
+* [ ] Create `.well-known/ai.txt` (AI crawler policy)
+* [ ] Create `.well-known/humans.txt` (credits file)
+* [ ] Create `RSR_COMPLIANCE.adoc` specification document
+* [ ] Create `guix.scm` or `flake.nix` package definition
+
+==== State Management
+
+* [ ] Create `STATE.scm` Guile Scheme lifecycle tracker
+* [ ] Create `META.scm` project metadata
+* [ ] Implement state-phase recipes in justfile
+
+==== Template Placeholder System
+
+* [ ] Document all `{{PLACEHOLDER}}` values
+* [ ] Create `init.sh` or `just init` recipe for placeholder replacement
+* [ ] Add validation for unreplaced placeholders in CI
+
+---
+
+=== Phase 2: Language-Specific Templates
+
+==== Rust Project Template
+
+* [ ] Cargo.toml template
+* [ ] src/main.rs and src/lib.rs stubs
+* [ ] Justfile customizations for cargo commands
+* [ ] cargo-audit integration
+
+==== ReScript Project Template
+
+* [ ] rescript.json configuration
+* [ ] src/ directory structure
+* [ ] Deno integration patterns
+* [ ] Justfile customizations for ReScript
+
+==== Gleam Project Template
+
+* [ ] gleam.toml configuration
+* [ ] src/ directory structure
+* [ ] BEAM vs JS target configuration
+* [ ] Justfile customizations for Gleam
+
+==== Tauri/Dioxus Mobile Template
+
+* [ ] Tauri 2.0 project structure
+* [ ] Dioxus project structure
+* [ ] Mobile build configurations (iOS/Android)
+* [ ] Platform-specific justfile recipes
+
+---
+
+=== Phase 3: Documentation Expansion
+
+==== Architecture Decision Records
+
+* [ ] Create docs/architecture/ directory
+* [ ] ADR-001: Language policy rationale
+* [ ] ADR-002: Perimeter architecture design
+* [ ] ADR-003: Package manager selection
+* [ ] ADR template
+
+==== Specification Documents
+
+* [ ] RSR Specification v1.0 formal document
+* [ ] Perimeter governance detailed specification
+* [ ] Language policy versioning and evolution
+
+==== Guides
+
+* [ ] Migration guide from TypeScript to ReScript
+* [ ] Migration guide from Node.js to Deno
+* [ ] Setting up multi-forge mirroring
+* [ ] Guix packaging guide for RSR projects
+
+---
+
+=== Phase 4: Tooling & Automation
+
+==== RSR CLI Tool
+
+* [ ] Scaffold new RSR projects from template
+* [ ] Validate existing repos against RSR spec
+* [ ] Auto-fix common compliance issues
+* [ ] Generate compliance reports
+
+==== Enhanced CI/CD
+
+* [ ] Matrix builds for multiple languages
+* [ ] Automated dependency updates (Renovate/Dependabot)
+* [ ] Release automation with changelog generation
+* [ ] Container image publishing
+
+==== Forge Integration
+
+* [ ] Codeberg mirror configuration
+* [ ] Sourcehut mirror configuration
+* [ ] Self-hosted Forgejo support
+* [ ] Cross-forge issue sync
+
+---
+
+=== Phase 5: Ecosystem
+
+==== Reference Implementations
+
+* [ ] Example Rust CLI project
+* [ ] Example ReScript web application
+* [ ] Example Gleam backend service
+* [ ] Example Tauri mobile app
+
+==== Community
+
+* [ ] RSR adopter showcase
+* [ ] Contributing to RSR specification
+* [ ] RFC process for RSR changes
+* [ ] Community forum or Matrix channel
+
+---
+
+== Version Milestones
+
+[cols="1,2,3"]
+|===
+|Version |Milestone |Key Deliverables
+
+|*0.2.0*
+|Template Complete
+|All compliance files, STATE.scm, placeholder system
+
+|*0.3.0*
+|Language Templates
+|Rust, ReScript, Gleam project templates
+
+|*0.4.0*
+|Documentation
+|ADRs, specification documents, migration guides
+
+|*0.5.0*
+|Tooling
+|RSR CLI tool, enhanced CI/CD
+
+|*1.0.0*
+|Stable Release
+|Complete specification, reference implementations
+|===
+
+---
+
+== Contributing to the Roadmap
+
+Suggestions for the roadmap are welcome via:
+
+* GitHub Issues with label `roadmap`
+* Pull requests to this file
+* Discussions in the project forum
+
+See link:CONTRIBUTING.md[CONTRIBUTING.md] for contribution guidelines.
+
+---
+
+_Last updated: 2025-12-26_
