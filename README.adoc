@@ -1,1 +1,283 @@
+= RSR-template-repo
+:toc: left
+:toclevels: 3
+:icons: font
+:source-highlighter: rouge
 
+== Overview
+
+*RSR-template-repo* is the canonical template for *Rhodium Standard Repository (RSR)* projects — a comprehensive framework for creating standardized, polyglot open-source repositories with strong community governance, modern tooling choices, and automated policy enforcement.
+
+This repository contains no application code. It is a *specification and template* that defines:
+
+* Language and tooling policies
+* Community governance models
+* CI/CD enforcement workflows
+* Security best practices
+* Build automation patterns
+
+== Project Status
+
+[cols="1,3"]
+|===
+|Phase |Template Development
+|Version |0.1.0
+|Tier |Infrastructure
+|===
+
+== Core Concepts
+
+=== Language Policy
+
+RSR enforces opinionated tooling choices favouring modern, type-safe, FOSS-first technologies.
+
+==== Allowed Technologies
+
+[cols="2,3,2"]
+|===
+|Technology |Use Case |Notes
+
+|*ReScript*
+|Primary application code
+|Compiles to JS, type-safe
+
+|*Rust*
+|Performance-critical, systems, WASM, CLI
+|Preferred for native code
+
+|*Deno*
+|Runtime & package management
+|Replaces Node/npm/bun
+
+|*Gleam*
+|Backend services
+|BEAM or JS target
+
+|*Tauri 2.0+*
+|Mobile apps (iOS/Android)
+|Rust backend + web UI
+
+|*Dioxus*
+|Mobile apps (native UI)
+|Pure Rust, React-like
+
+|*Bash/POSIX Shell*
+|Scripts, automation
+|Keep minimal
+
+|*Nickel*
+|Configuration language
+|Complex configs
+
+|*Guile Scheme*
+|State/meta files
+|STATE.scm, META.scm
+
+|*Julia*
+|Batch scripts, data processing
+|Per RSR specification
+
+|*OCaml*
+|AffineScript compiler
+|Language-specific
+
+|*Ada*
+|Safety-critical systems
+|Where required
+|===
+
+==== Banned Technologies
+
+[cols="1,2"]
+|===
+|Banned |Replacement
+
+|TypeScript |ReScript
+|Node.js / npm / bun / pnpm / yarn |Deno
+|Go |Rust
+|Python (general use) |ReScript/Rust
+|Java / Kotlin |Rust / Tauri / Dioxus
+|Swift |Tauri / Dioxus
+|React Native |Tauri / Dioxus
+|Flutter / Dart |Tauri / Dioxus
+|===
+
+=== Perimeter Architecture
+
+RSR introduces a *tiered contributor access model* for repository governance:
+
+[cols="1,2,3"]
+|===
+|Perimeter |Scope |Access
+
+|*P1 (Core)*
+|Infrastructure, CI/CD, build configs, security
+|Maintainers only
+
+|*P2 (Features)*
+|Source code, libraries, extensions, plugins
+|Trusted contributors
+
+|*P3 (Community)*
+|Documentation, examples, tests, proposals
+|Open to all contributors
+|===
+
+==== Repository Structure by Perimeter
+
+----
+project/
+├── src/                 # Source code (P1-2)
+├── lib/                 # Library code (P1-2)
+├── extensions/          # Extensions (P2)
+├── plugins/             # Plugins (P2)
+├── tools/               # Tooling (P2)
+├── docs/                # Documentation (P3)
+│   ├── architecture/    # ADRs, specs (P2)
+│   └── proposals/       # RFCs (P3)
+├── examples/            # Examples (P3)
+├── tests/               # Test suite (P2-3)
+├── .well-known/         # Protocol files (P1-3)
+├── .github/             # GitHub config (P1)
+├── justfile             # Task runner (P1)
+└── flake.nix            # Nix flake (P1)
+----
+
+=== Package Management
+
+[cols="1,2"]
+|===
+|Manager |Purpose
+
+|*Guix* (guix.scm)
+|Primary — reproducible builds
+
+|*Nix* (flake.nix)
+|Fallback — reproducibility
+
+|*Deno* (deno.json)
+|JavaScript dependencies
+|===
+
+== What's Included
+
+=== Template Files
+
+* `CODE_OF_CONDUCT.md` — Comprehensive contributor covenant with perimeter-aware enforcement
+* `CONTRIBUTING.md` — Contribution guidelines with branch naming and commit conventions
+* `SECURITY.md` — Security policy with coordinated disclosure and safe harbour provisions
+* `LICENSE.txt` — Dual MIT/AGPL-3.0+ license template
+* `.claude/CLAUDE.md` — AI assistant language policy instructions
+
+=== Build Automation
+
+* `justfile` — 430+ lines of task recipes covering:
+** Build/compile (debug, release, watch)
+** Test & quality (lint, format, coverage)
+** Documentation generation
+** Container management (nerdctl + Wolfi)
+** Security auditing (SBOM, vulnerability scanning)
+** RSR compliance validation
+** Guix/Nix shell integration
+
+=== CI/CD Workflows
+
+[cols="1,3"]
+|===
+|Workflow |Purpose
+
+|`rsr-antipattern.yml`
+|Enforces language policy (blocks TS, Go, npm)
+
+|`wellknown-enforcement.yml`
+|RFC 9116 security.txt validation
+
+|`quality.yml`
+|Secrets scanning, TODO tracking, file permissions
+
+|`codeql.yml`
+|Static security analysis
+
+|`guix-nix-policy.yml`
+|Package manager policy enforcement
+
+|`mirror.yml`
+|Multi-forge repository mirroring
+
+|`scorecard.yml`
+|OpenSSF security scorecard
+
+|`instant-sync.yml`
+|Repository dispatch for forge propagation
+|===
+
+== Usage
+
+=== Starting a New RSR Project
+
+. Clone or fork this template repository
+. Replace all `{{PLACEHOLDER}}` values in template files
+. Customize `justfile` recipes for your language/toolchain
+. Configure `.github/workflows/` for your CI needs
+. Remove template instruction comments from docs
+
+=== Validating RSR Compliance
+
+[source,bash]
+----
+# Check RSR compliance
+just validate-rsr
+
+# Run full validation suite
+just validate
+----
+
+=== Available Commands
+
+[source,bash]
+----
+# Show all recipes
+just
+
+# Show help for a recipe
+just help <recipe>
+
+# Generate documentation
+just docs
+
+# Run CI pipeline locally
+just ci
+----
+
+== Security
+
+* No MD5/SHA1 for security purposes (SHA256+ required)
+* HTTPS only (no HTTP URLs)
+* No hardcoded secrets
+* SHA-pinned dependencies where possible
+* SPDX license headers required on all source files
+
+See link:SECURITY.md[SECURITY.md] for vulnerability reporting procedures.
+
+== Contributing
+
+See link:CONTRIBUTING.md[CONTRIBUTING.md] for guidelines on:
+
+* Branch naming conventions
+* Commit message format (Conventional Commits)
+* Perimeter-appropriate contributions
+* Development workflow
+
+== License
+
+Dual-licensed under link:LICENSE.txt[MIT and AGPL-3.0+].
+
+== Acknowledgments
+
+* https://www.contributor-covenant.org/[Contributor Covenant] — Code of Conduct foundation
+* https://just.systems/[Just] — Command runner
+* https://guix.gnu.org/[GNU Guix] — Reproducible package management
+
+---
+
+_RSR-template-repo is maintained by https://github.com/hyperpolymath[Hyperpolymath]._
