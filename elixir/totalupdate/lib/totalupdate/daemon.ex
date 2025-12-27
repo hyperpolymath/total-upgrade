@@ -133,8 +133,12 @@ defmodule TotalUpdate.Daemon do
   # ═══════════════════════════════════════════════════════════════════════════
 
   defp load_config do
-    # TODO: Load from config file
-    %{
+    config_paths = [
+      Path.expand("~/.config/totalupdate/config.scm"),
+      "/etc/totalupdate/config.scm"
+    ]
+
+    default_config = %{
       check_interval: @default_check_interval,
       mode: :conservative,  # :aggressive, :conservative, :manual
       auto_apply: false,
@@ -144,6 +148,44 @@ defmodule TotalUpdate.Daemon do
       blacklist: [],
       version_pins: %{}
     }
+
+    case Enum.find(config_paths, &File.exists?/1) do
+      nil ->
+        default_config
+
+      path ->
+        case parse_config_file(path) do
+          {:ok, parsed} -> Map.merge(default_config, parsed)
+          {:error, _} -> default_config
+        end
+    end
+  end
+
+  defp parse_config_file(path) do
+    try do
+      content = File.read!(path)
+
+      config =
+        Regex.scan(~r/\((\w+[-\w]*)\s+[.\s]*([^\)]+)\)/, content)
+        |> Enum.reduce(%{}, fn [_, key, value], acc ->
+          atom_key = key |> String.replace("-", "_") |> String.to_atom()
+          parsed_value = parse_value(String.trim(value))
+          Map.put(acc, atom_key, parsed_value)
+        end)
+
+      {:ok, config}
+    rescue
+      _ -> {:error, :parse_error}
+    end
+  end
+
+  defp parse_value("#t"), do: true
+  defp parse_value("#f"), do: false
+  defp parse_value(value) do
+    case Integer.parse(value) do
+      {int, ""} -> int
+      _ -> String.trim(value, "\"")
+    end
   end
 
   defp schedule_check(interval) do
@@ -179,12 +221,13 @@ defmodule TotalUpdate.Daemon do
     }
   end
 
-  defp collect_updates(config) do
+  defp collect_updates(_config) do
     # Collect updates from all sources
     updates = []
 
-    # System packages (via DNFinition)
-    # TODO: Implement when DNFinition Ada wrapper is ready
+    # System packages (via DNFinition backends)
+    updates =
+      updates ++ collect_system_updates()
 
     # Language packages
     updates = updates ++ check_deno_updates()
@@ -195,6 +238,36 @@ defmodule TotalUpdate.Daemon do
     updates = updates ++ check_flatpak_updates()
 
     updates
+  end
+
+  defp collect_system_updates do
+    # Query available updates from all registered backends
+    case TotalUpdate.PluginManager.available_plugins() do
+      {:ok, plugins} ->
+        Enum.flat_map(plugins, fn plugin ->
+          case get_backend_updates(plugin) do
+            {:ok, updates} -> updates
+            _ -> []
+          end
+        end)
+
+      _ ->
+        []
+    end
+  end
+
+  defp get_backend_updates(plugin) do
+    try do
+      backend = plugin.module.backend_module()
+
+      if function_exported?(backend, :get_upgradable, 0) do
+        {:ok, backend.get_upgradable()}
+      else
+        {:ok, []}
+      end
+    rescue
+      _ -> {:error, :backend_unavailable}
+    end
   end
 
   defp check_deno_updates do
