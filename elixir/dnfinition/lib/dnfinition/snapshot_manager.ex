@@ -259,12 +259,56 @@ defmodule DNFinition.SnapshotManager do
   end
 
   defp load_config do
-    # TODO: Load from config file
-    %{
+    config_paths = [
+      Path.expand("~/.config/dnfinition/snapshots.scm"),
+      "/etc/dnfinition/snapshots.scm"
+    ]
+
+    default_config = %{
       max_snapshots: @default_max_snapshots,
       auto_cleanup: true,
       snapshot_path: "/.snapshots"
     }
+
+    case Enum.find(config_paths, &File.exists?/1) do
+      nil ->
+        default_config
+
+      path ->
+        case parse_scheme_config(path) do
+          {:ok, parsed} -> Map.merge(default_config, parsed)
+          {:error, _} -> default_config
+        end
+    end
+  end
+
+  defp parse_scheme_config(path) do
+    # Simple key-value parser for Scheme config
+    # Format: (key . value) or (key value)
+    try do
+      content = File.read!(path)
+
+      config =
+        Regex.scan(~r/\((\w+[-\w]*)\s+[.\s]*([^\)]+)\)/, content)
+        |> Enum.reduce(%{}, fn [_, key, value], acc ->
+          atom_key = key |> String.replace("-", "_") |> String.to_atom()
+          parsed_value = parse_config_value(String.trim(value))
+          Map.put(acc, atom_key, parsed_value)
+        end)
+
+      {:ok, config}
+    rescue
+      _ -> {:error, :parse_error}
+    end
+  end
+
+  defp parse_config_value("#t"), do: true
+  defp parse_config_value("#f"), do: false
+  defp parse_config_value(value) do
+    case Integer.parse(value) do
+      {int, ""} -> int
+      _ -> String.trim(value, "\"")
+    end
   end
 
   defp schedule_cleanup do
@@ -292,8 +336,10 @@ defmodule DNFinition.SnapshotManager do
 
       :zfs ->
         # Create ZFS snapshot
-        # TODO: Detect ZFS pool name
-        case System.cmd("zfs", ["snapshot", "rpool/ROOT@dnfinition-#{snapshot.id}"]) do
+        pool_name = detect_zfs_root_pool()
+        snapshot_name = "#{pool_name}@dnfinition-#{snapshot.id}"
+
+        case System.cmd("zfs", ["snapshot", "-r", snapshot_name]) do
           {_, 0} -> :ok
           {error, _} -> {:error, error}
         end
@@ -331,7 +377,10 @@ defmodule DNFinition.SnapshotManager do
 
       :zfs ->
         # ZFS rollback
-        case System.cmd("zfs", ["rollback", "rpool/ROOT@dnfinition-#{snapshot.id}"]) do
+        pool_name = detect_zfs_root_pool()
+        snapshot_name = "#{pool_name}@dnfinition-#{snapshot.id}"
+
+        case System.cmd("zfs", ["rollback", "-r", snapshot_name]) do
           {_, 0} -> :ok
           {error, _} -> {:error, error}
         end
@@ -358,7 +407,10 @@ defmodule DNFinition.SnapshotManager do
         end
 
       :zfs ->
-        case System.cmd("zfs", ["destroy", "rpool/ROOT@dnfinition-#{snapshot.id}"]) do
+        pool_name = detect_zfs_root_pool()
+        snapshot_name = "#{pool_name}@dnfinition-#{snapshot.id}"
+
+        case System.cmd("zfs", ["destroy", snapshot_name]) do
           {_, 0} -> :ok
           {error, _} -> {:error, error}
         end
@@ -371,6 +423,25 @@ defmodule DNFinition.SnapshotManager do
 
       _ ->
         :ok
+    end
+  end
+
+  defp detect_zfs_root_pool do
+    # Detect the ZFS dataset containing root filesystem
+    case System.cmd("zfs", ["list", "-H", "-o", "name", "/"]) do
+      {output, 0} ->
+        output |> String.trim()
+
+      _ ->
+        # Fallback: try to find from mount
+        case System.cmd("findmnt", ["-n", "-o", "SOURCE", "/"]) do
+          {output, 0} ->
+            output |> String.trim() |> String.split("/") |> hd()
+
+          _ ->
+            # Default fallback
+            "rpool/ROOT"
+        end
     end
   end
 end

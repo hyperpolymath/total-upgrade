@@ -6,8 +6,8 @@
 == Current State
 
 *Version:* 0.1.0 +
-*Phase:* Foundation Development +
-*Status:* Architecture established, core modules implemented
+*Phase:* Walking Skeleton Complete +
+*Status:* Guix/Nix backends working, safety boundary verified, plugin architecture implemented
 
 === Completed
 
@@ -24,12 +24,14 @@
 ** Package info types
 ** Transaction types
 ** Operation result types
+** Backend registry implementation
 
 * [x] Reversibility types (Ada/SPARK)
 ** Snapshot ID and management types
 ** Transaction logging types
 ** SPARK contracts for rollback safety
 ** Rollback result types
+** Snapshot manager implementation
 
 * [x] Elixir OTP application skeleton
 ** DNFinition Application and Supervisor
@@ -41,8 +43,11 @@
 * [x] TotalUpdate daemon skeleton
 ** Application and Supervisor
 ** Main daemon process
-** Scheduler skeleton
-** Strategy engine skeleton
+** Scheduler GenServer
+** Watcher GenServer
+** Download manager GenServer (aria2 integration)
+** Plugin manager GenServer
+** Strategy engine GenServer
 
 * [x] TUI framework (Ada)
 ** Color scheme definitions
@@ -55,6 +60,41 @@
 ** Elixir mix.exs
 ** Justfile with 40+ recipes
 ** Man page generation
+
+==== Walking Skeleton (Phase 1.5) ✓ NEW
+
+* [x] Guix backend (Ada + Elixir)
+** Generation-based install/upgrade/rollback
+** Native recovery point support
+** Profile management
+
+* [x] Nix backend (Ada + Elixir)
+** Generation-based install/upgrade/rollback
+** Native recovery point support
+** Profile management
+
+* [x] Safety boundary module (Ada/SPARK)
+** Recovery_Point_Token type
+** Critical invariant enforcement
+** Formal verification of safety properties
+
+* [x] Plugin architecture
+** Plugin behaviour/interface
+** Plugin registry with capability-based selection
+** Priority-ordered plugin discovery
+** Built-in Guix and Nix plugins
+
+* [x] Strategy matrix
+** Snapshot backend detection (btrfs, ZFS, LVM, native)
+** Risk level assessment
+** Strategy selection based on PM + filesystem + risk
+** Strategy documentation
+
+* [x] DNFinition CLI commands
+** search, install, remove, upgrade, list
+** snapshots, rollback
+** Automatic recovery point creation
+** Backend integration
 
 ---
 
@@ -103,8 +143,8 @@
 ==== Priority 0 (Immutable Systems)
 
 * [ ] rpm-ostree (Silverblue, Kinoite, CoreOS)
-* [ ] Nix (NixOS and standalone)
-* [ ] Guix (Guix System and standalone)
+* [x] Nix (NixOS and standalone) ✓
+* [x] Guix (Guix System and standalone) ✓
 
 ==== Priority 1 (Major Distributions)
 
