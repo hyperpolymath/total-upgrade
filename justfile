@@ -105,13 +105,19 @@ clean-all: clean
 # ═══════════════════════════════════════════════════════════════════════════════
 
 # Run all tests
-test: test-ada test-elixir
+test: test-ada test-elixir test-skeleton
     @echo "All tests passed!"
 
 # Run Ada tests (AUnit)
 test-ada:
     @echo "Running Ada tests..."
     @echo "(Ada tests not yet implemented)"
+
+# Run walking skeleton integration tests
+test-skeleton:
+    @echo "Running walking skeleton tests..."
+    @chmod +x test/skeleton_test.sh
+    ./test/skeleton_test.sh
 
 # Run Elixir tests
 test-elixir:
