@@ -1,4 +1,4 @@
-= RSR-template-repo Roadmap
+= TotalUpdate & DNFinition Roadmap
 :toc: left
 :toclevels: 2
 :icons: font
@@ -6,166 +6,258 @@
 == Current State
 
 *Version:* 0.1.0 +
-*Phase:* Template Development +
-*Status:* Foundation established
+*Phase:* Foundation Development +
+*Status:* Architecture established, core modules implemented
 
 === Completed
 
-==== Template Infrastructure
+==== Foundation (Phase 1)
 
-* [x] Justfile with 50+ task recipes
-* [x] CI/CD workflows for GitHub Actions (10 workflows)
-* [x] GitLab CI/CD pipeline configuration
-* [x] EditorConfig for 15+ languages
-* [x] Gitattributes for line endings and binary handling
+* [x] Platform detection module (Ada)
+** OS family detection (Linux, macOS, BSD, Windows)
+** Linux distribution detection (30+ distros)
+** Package manager auto-detection
+** Container/WSL/immutable system detection
 
-==== Community Governance
+* [x] Backend interface abstraction (Ada)
+** Abstract interface for all package managers
+** Package info types
+** Transaction types
+** Operation result types
 
-* [x] CODE_OF_CONDUCT.md with perimeter-aware enforcement
-* [x] CONTRIBUTING.md with workflow guidelines
-* [x] SECURITY.md with coordinated disclosure policy
-* [x] LICENSE.txt dual MIT/AGPL-3.0+ template
-* [x] Issue templates (bug, feature, docs, question, custom)
+* [x] Reversibility types (Ada/SPARK)
+** Snapshot ID and management types
+** Transaction logging types
+** SPARK contracts for rollback safety
+** Rollback result types
 
-==== Policy Enforcement
+* [x] Elixir OTP application skeleton
+** DNFinition Application and Supervisor
+** Ada wrapper (Port integration)
+** Snapshot manager GenServer
+** Transaction log GenServer
+** Recovery manager
 
-* [x] Language antipattern detection (rsr-antipattern.yml)
-* [x] RFC 9116 security.txt validation
-* [x] Guix/Nix package manager policy
-* [x] OpenSSF Scorecard integration
-* [x] CodeQL static analysis
+* [x] TotalUpdate daemon skeleton
+** Application and Supervisor
+** Main daemon process
+** Scheduler skeleton
+** Strategy engine skeleton
 
-==== Documentation
+* [x] TUI framework (Ada)
+** Color scheme definitions
+** Box drawing characters
+** Status indicators
+** Main window specification
 
-* [x] README.adoc with comprehensive overview
-* [x] CLAUDE.md AI assistant language policy
-* [x] docs/CITATIONS.adoc citation formats
+* [x] Build system
+** GNAT project files (.gpr)
+** Elixir mix.exs
+** Justfile with 40+ recipes
+** Man page generation
 
 ---
 
 == Roadmap
 
-=== Phase 1: Template Completion
+=== Phase 1: Foundation Completion
 
-==== Missing RSR Compliance Files
+==== Remaining Items
 
-* [ ] Create `.well-known/security.txt` (RFC 9116)
-* [ ] Create `.well-known/ai.txt` (AI crawler policy)
-* [ ] Create `.well-known/humans.txt` (credits file)
-* [ ] Create `RSR_COMPLIANCE.adoc` specification document
-* [ ] Create `guix.scm` or `flake.nix` package definition
-
-==== State Management
-
-* [ ] Create `STATE.scm` Guile Scheme lifecycle tracker
-* [ ] Create `META.scm` project metadata
-* [ ] Implement state-phase recipes in justfile
-
-==== Template Placeholder System
-
-* [ ] Document all `{{PLACEHOLDER}}` values
-* [ ] Create `init.sh` or `just init` recipe for placeholder replacement
-* [ ] Add validation for unreplaced placeholders in CI
+* [ ] ncurses bindings (Ada)
+* [ ] TUI main window implementation
+* [ ] Package browser view
+* [ ] First backend: rpm-ostree
+* [ ] Ada/Elixir port communication protocol
 
 ---
 
-=== Phase 2: Language-Specific Templates
+=== Phase 2: Core Reversibility
 
-==== Rust Project Template
+==== Snapshot Manager Implementation
 
-* [ ] Cargo.toml template
-* [ ] src/main.rs and src/lib.rs stubs
-* [ ] Justfile customizations for cargo commands
-* [ ] cargo-audit integration
+* [ ] btrfs snapshot backend
+* [ ] ZFS snapshot backend
+* [ ] LVM snapshot backend
+* [ ] Snapper integration (openSUSE)
+* [ ] rpm-ostree deployment tracking
 
-==== ReScript Project Template
+==== Transaction Logging
 
-* [ ] rescript.json configuration
-* [ ] src/ directory structure
-* [ ] Deno integration patterns
-* [ ] Justfile customizations for ReScript
+* [ ] Log file format specification
+* [ ] Log parsing and replay
+* [ ] Log compression and rotation
+* [ ] Atomic log writes
 
-==== Gleam Project Template
+==== Rollback Engine
 
-* [ ] gleam.toml configuration
-* [ ] src/ directory structure
-* [ ] BEAM vs JS target configuration
-* [ ] Justfile customizations for Gleam
-
-==== Tauri/Dioxus Mobile Template
-
-* [ ] Tauri 2.0 project structure
-* [ ] Dioxus project structure
-* [ ] Mobile build configurations (iOS/Android)
-* [ ] Platform-specific justfile recipes
+* [ ] SPARK proofs for rollback safety
+* [ ] Partial rollback support
+* [ ] Boot-time recovery check
+* [ ] Emergency rollback (grub integration)
 
 ---
 
-=== Phase 3: Documentation Expansion
+=== Phase 3: Package Manager Backends
 
-==== Architecture Decision Records
+==== Priority 0 (Immutable Systems)
 
-* [ ] Create docs/architecture/ directory
-* [ ] ADR-001: Language policy rationale
-* [ ] ADR-002: Perimeter architecture design
-* [ ] ADR-003: Package manager selection
-* [ ] ADR template
+* [ ] rpm-ostree (Silverblue, Kinoite, CoreOS)
+* [ ] Nix (NixOS and standalone)
+* [ ] Guix (Guix System and standalone)
 
-==== Specification Documents
+==== Priority 1 (Major Distributions)
 
-* [ ] RSR Specification v1.0 formal document
-* [ ] Perimeter governance detailed specification
-* [ ] Language policy versioning and evolution
+* [ ] dnf (Fedora, RHEL 8+)
+* [ ] apt (Debian, Ubuntu)
+* [ ] zypper (openSUSE, SLE)
+* [ ] pacman (Arch)
 
-==== Guides
+==== Priority 2 (BSD and macOS)
 
-* [ ] Migration guide from TypeScript to ReScript
-* [ ] Migration guide from Node.js to Deno
-* [ ] Setting up multi-forge mirroring
-* [ ] Guix packaging guide for RSR projects
+* [ ] pkg (FreeBSD)
+* [ ] pkg_add (OpenBSD)
+* [ ] Homebrew (macOS)
 
----
+==== Priority 3 (Other)
 
-=== Phase 4: Tooling & Automation
-
-==== RSR CLI Tool
-
-* [ ] Scaffold new RSR projects from template
-* [ ] Validate existing repos against RSR spec
-* [ ] Auto-fix common compliance issues
-* [ ] Generate compliance reports
-
-==== Enhanced CI/CD
-
-* [ ] Matrix builds for multiple languages
-* [ ] Automated dependency updates (Renovate/Dependabot)
-* [ ] Release automation with changelog generation
-* [ ] Container image publishing
-
-==== Forge Integration
-
-* [ ] Codeberg mirror configuration
-* [ ] Sourcehut mirror configuration
-* [ ] Self-hosted Forgejo support
-* [ ] Cross-forge issue sync
+* [ ] xbps (Void)
+* [ ] apk (Alpine)
+* [ ] Flatpak
+* [ ] Snap
 
 ---
 
-=== Phase 5: Ecosystem
+=== Phase 4: TotalUpdate Features
 
-==== Reference Implementations
+==== Download Management
 
-* [ ] Example Rust CLI project
-* [ ] Example ReScript web application
-* [ ] Example Gleam backend service
-* [ ] Example Tauri mobile app
+* [ ] aria2 integration
+* [ ] Parallel download manager
+* [ ] Bandwidth throttling
+* [ ] Resume support
+* [ ] Mirror selection
 
-==== Community
+==== IPFS Integration
 
-* [ ] RSR adopter showcase
-* [ ] Contributing to RSR specification
-* [ ] RFC process for RSR changes
-* [ ] Community forum or Matrix channel
+* [ ] Kubo client integration
+* [ ] Content-addressed packages
+* [ ] Pinning strategy
+* [ ] Fallback to HTTP mirrors
+
+==== Strategy Engine
+
+* [ ] Configuration file parsing (TOML)
+* [ ] Whitelist/blacklist enforcement
+* [ ] Version pinning
+* [ ] Schedule management
+* [ ] Conservative/aggressive/manual modes
+
+==== Daemon Features
+
+* [ ] systemd service file
+* [ ] D-Bus interface
+* [ ] Idle detection
+* [ ] Low-memory mode (<5MB)
+
+---
+
+=== Phase 5: Language Package Managers
+
+==== JavaScript/TypeScript
+
+* [ ] Deno (primary)
+* [ ] npm/yarn/pnpm (for compatibility)
+
+==== Python
+
+* [ ] pip
+* [ ] pipx
+* [ ] poetry
+* [ ] conda/mamba
+
+==== Rust
+
+* [ ] rustup (toolchain)
+* [ ] cargo (crates)
+
+==== Other
+
+* [ ] cabal (Haskell)
+* [ ] hex (Elixir/Erlang)
+* [ ] gem (Ruby)
+* [ ] composer (PHP)
+* [ ] go modules (with restrictions)
+
+---
+
+=== Phase 6: App Internal Updaters
+
+==== Discovery Methods
+
+* [ ] D-Bus signal monitoring
+* [ ] HTTP API detection
+* [ ] CLI trigger discovery
+* [ ] Config file update methods
+
+==== Supported Applications
+
+* [ ] Firefox
+* [ ] VS Code
+* [ ] Steam
+* [ ] Discord
+* [ ] Electron apps (general)
+
+---
+
+=== Phase 7: Advanced Features
+
+==== Userscript Management
+
+* [ ] Greasemonkey support
+* [ ] Tampermonkey support
+* [ ] Violentmonkey support
+* [ ] Auto-update from Greasy Fork
+
+==== OS Upgrades
+
+* [ ] Fedora system-upgrade
+* [ ] Ubuntu do-release-upgrade
+* [ ] FreeBSD freebsd-update upgrade
+* [ ] macOS softwareupdate
+
+==== Web Dashboard (Optional)
+
+* [ ] Status overview
+* [ ] Manual update triggers
+* [ ] Configuration UI
+* [ ] Log viewer
+
+---
+
+=== Phase 8: Polish & Release
+
+==== Quality
+
+* [ ] Full SPARK verification
+* [ ] Cross-platform testing matrix
+* [ ] Performance optimization
+* [ ] Memory profiling
+
+==== Documentation
+
+* [ ] User manual
+* [ ] Administrator guide
+* [ ] Plugin development guide
+* [ ] API documentation
+
+==== Distribution
+
+* [ ] Fedora COPR package
+* [ ] Debian/Ubuntu PPA
+* [ ] Arch AUR package
+* [ ] Container images
+* [ ] GitLab release pipeline
 
 ---
 
@@ -176,38 +268,80 @@
 |Version |Milestone |Key Deliverables
 
 |*0.2.0*
-|Template Complete
-|All compliance files, STATE.scm, placeholder system
+|Core TUI
+|Working ncurses interface, rpm-ostree backend
 
 |*0.3.0*
-|Language Templates
-|Rust, ReScript, Gleam project templates
+|Reversibility
+|Snapshot manager, rollback working
 
 |*0.4.0*
-|Documentation
-|ADRs, specification documents, migration guides
+|Major Backends
+|dnf, apt, pacman backends
 
 |*0.5.0*
-|Tooling
-|RSR CLI tool, enhanced CI/CD
+|TotalUpdate Alpha
+|Background daemon, aria2 integration
+
+|*0.6.0*
+|Language Packages
+|Deno, pip, rustup support
+
+|*0.7.0*
+|IPFS
+|Decentralized package distribution
+
+|*0.8.0*
+|Full Platform Support
+|BSD, macOS, Windows backends
+
+|*0.9.0*
+|App Updaters
+|Internal updater detection
 
 |*1.0.0*
 |Stable Release
-|Complete specification, reference implementations
+|Full documentation, SPARK verified
 |===
 
 ---
 
-== Contributing to the Roadmap
+== Business Model
 
-Suggestions for the roadmap are welcome via:
+=== FOSS Plugins (Free)
 
-* GitHub Issues with label `roadmap`
-* Pull requests to this file
-* Discussions in the project forum
+* All open-source software plugins
+* Community contributions
+* Maintained by project
 
-See link:CONTRIBUTING.md[CONTRIBUTING.md] for contribution guidelines.
+=== Proprietary Plugins (Paid)
+
+[cols="1,2"]
+|===
+|Tier |Description
+
+|*Simple ($50-100)*
+|Basic CLI wrapper, simple API
+
+|*Medium ($100-250)*
+|Complex API, custom protocol
+
+|*Complex ($250-500+)*
+|Reverse engineering, custom development
+|===
 
 ---
 
-_Last updated: 2025-12-26_
+== Contributing
+
+Suggestions welcome via:
+
+* GitLab Issues
+* Pull requests
+* Email: jonathan@hyperpolymath.io
+
+See link:CONTRIBUTING.md[CONTRIBUTING.md] for guidelines.
+
+---
+
+_Last updated: 2025-12-27_

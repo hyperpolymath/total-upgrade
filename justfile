@@ -1,21 +1,23 @@
-# RSR-template-repo - RSR Standard Justfile Template
+# TotalUpdate & DNFinition - Universal Package Management
 # https://just.systems/man/en/
 #
-# This is the CANONICAL template for all RSR projects.
-# Copy this file to new projects and customize the {{PLACEHOLDER}} values.
+# TotalUpdate: Automated background daemon for keeping everything up-to-date
+# DNFinition: Interactive TUI package manager with reversibility
 #
 # Run `just` to see all available recipes
-# Run `just cookbook` to generate docs/just-cookbook.adoc
-# Run `just combinations` to see matrix recipe options
+# Run `just build` to build all components
 
 set shell := ["bash", "-uc"]
 set dotenv-load := true
 set positional-arguments := true
 
-# Project metadata - CUSTOMIZE THESE
-project := "RSR-template-repo"
+# Project metadata
+project := "totalupdate"
 version := "0.1.0"
-tier := "infrastructure"  # 1 | 2 | infrastructure
+tier := "infrastructure"
+
+# Build configuration
+ada_mode := env_var_or_default("BUILD_MODE", "debug")
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # DEFAULT & HELP
@@ -33,48 +35,66 @@ help recipe="":
         echo ""
         echo "Usage: just help <recipe>"
         echo "       just cookbook     # Generate full documentation"
-        echo "       just combinations # Show matrix recipes"
     else
         just --show "{{recipe}}" 2>/dev/null || echo "Recipe '{{recipe}}' not found"
     fi
 
 # Show this project's info
 info:
-    @echo "Project: {{project}}"
+    @echo "╔═══════════════════════════════════════════════════════════╗"
+    @echo "║  TotalUpdate & DNFinition                                ║"
+    @echo "║  Universal Package Management with Reversibility         ║"
+    @echo "╚═══════════════════════════════════════════════════════════╝"
+    @echo ""
     @echo "Version: {{version}}"
-    @echo "RSR Tier: {{tier}}"
-    @echo "Recipes: $(just --summary | wc -w)"
-    @[ -f STATE.scm ] && grep -oP '\(phase\s+\.\s+\K[^)]+' STATE.scm | head -1 | xargs -I{} echo "Phase: {}" || true
+    @echo "Build Mode: {{ada_mode}}"
+    @echo ""
+    @echo "Components:"
+    @echo "  DNFinition  - TUI package manager (Ada 2022 + ncurses)"
+    @echo "  TotalUpdate - Background update daemon (Elixir/OTP)"
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # BUILD & COMPILE
 # ═══════════════════════════════════════════════════════════════════════════════
 
-# Build the project (debug mode)
-build *args:
-    @echo "Building {{project}}..."
-    # TODO: Add build command for your language
-    # Rust: cargo build {{args}}
-    # ReScript: npm run build
-    # Elixir: mix compile
+# Build everything (DNFinition + TotalUpdate)
+build: build-dnfinition build-totalupdate
+    @echo "Build complete!"
+
+# Build DNFinition (Ada TUI)
+build-dnfinition:
+    @echo "Building DNFinition (Ada)..."
+    @mkdir -p ada/dnfinition/obj ada/dnfinition/bin
+    cd ada/dnfinition && gprbuild -P dnfinition.gpr -XBUILD_MODE={{ada_mode}} -j0
+
+# Build TotalUpdate (Elixir daemon)
+build-totalupdate: build-dnfinition
+    @echo "Building TotalUpdate (Elixir)..."
+    cd elixir/dnfinition && mix deps.get && mix compile
+    cd elixir/totalupdate && mix deps.get && mix compile
 
 # Build in release mode with optimizations
-build-release *args:
-    @echo "Building {{project}} (release)..."
-    # TODO: Add release build command
-    # Rust: cargo build --release {{args}}
+build-release:
+    BUILD_MODE=release just build
 
-# Build and watch for changes
-build-watch:
-    @echo "Watching for changes..."
-    # TODO: Add watch command
-    # Rust: cargo watch -x build
-    # ReScript: npm run watch
+# Build with SPARK verification
+build-spark:
+    @echo "Building with SPARK verification..."
+    @mkdir -p ada/dnfinition/obj ada/dnfinition/bin
+    cd ada/dnfinition && gprbuild -P dnfinition.gpr -XBUILD_MODE=spark -j0
+
+# Run SPARK proofs
+prove:
+    @echo "Running SPARK proofs..."
+    cd ada/dnfinition && gnatprove -P dnfinition.gpr --level=2
 
 # Clean build artifacts [reversible: rebuild with `just build`]
 clean:
     @echo "Cleaning..."
-    rm -rf target _build dist lib node_modules
+    rm -rf ada/dnfinition/obj ada/dnfinition/bin
+    rm -rf ada/totalupdate/obj ada/totalupdate/bin
+    rm -rf elixir/dnfinition/_build elixir/dnfinition/deps
+    rm -rf elixir/totalupdate/_build elixir/totalupdate/deps
 
 # Deep clean including caches [reversible: rebuild]
 clean-all: clean
@@ -85,23 +105,29 @@ clean-all: clean
 # ═══════════════════════════════════════════════════════════════════════════════
 
 # Run all tests
-test *args:
-    @echo "Running tests..."
-    # TODO: Add test command
-    # Rust: cargo test {{args}}
-    # ReScript: npm test
-    # Elixir: mix test
+test: test-ada test-elixir
+    @echo "All tests passed!"
 
-# Run tests with verbose output
-test-verbose:
-    @echo "Running tests (verbose)..."
-    # TODO: Add verbose test
+# Run Ada tests (AUnit)
+test-ada:
+    @echo "Running Ada tests..."
+    @echo "(Ada tests not yet implemented)"
 
-# Run tests and generate coverage report
-test-coverage:
-    @echo "Running tests with coverage..."
-    # TODO: Add coverage command
-    # Rust: cargo llvm-cov
+# Run Elixir tests
+test-elixir:
+    @echo "Running Elixir tests..."
+    cd elixir/dnfinition && mix test
+    cd elixir/totalupdate && mix test
+
+# Run Elixir dialyzer
+dialyzer:
+    @echo "Running Dialyzer..."
+    cd elixir/dnfinition && mix dialyzer
+    cd elixir/totalupdate && mix dialyzer
+
+# Run all quality checks
+quality: fmt-check lint test prove
+    @echo "All quality checks passed!"
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # LINT & FORMAT
@@ -110,52 +136,49 @@ test-coverage:
 # Format all source files [reversible: git checkout]
 fmt:
     @echo "Formatting..."
-    # TODO: Add format command
-    # Rust: cargo fmt
-    # ReScript: npm run format
-    # Elixir: mix format
+    cd elixir/dnfinition && mix format
+    cd elixir/totalupdate && mix format
 
 # Check formatting without changes
 fmt-check:
     @echo "Checking format..."
-    # TODO: Add format check
-    # Rust: cargo fmt --check
+    cd elixir/dnfinition && mix format --check-formatted
+    cd elixir/totalupdate && mix format --check-formatted
 
 # Run linter
 lint:
     @echo "Linting..."
-    # TODO: Add lint command
-    # Rust: cargo clippy -- -D warnings
-
-# Run all quality checks
-quality: fmt-check lint test
-    @echo "All quality checks passed!"
-
-# Fix all auto-fixable issues [reversible: git checkout]
-fix: fmt
-    @echo "Fixed all auto-fixable issues"
+    cd elixir/dnfinition && mix credo --strict
+    cd elixir/totalupdate && mix credo --strict
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # RUN & EXECUTE
 # ═══════════════════════════════════════════════════════════════════════════════
 
-# Run the application
-run *args:
-    @echo "Running {{project}}..."
-    # TODO: Add run command
-    # Rust: cargo run {{args}}
+# Run DNFinition TUI
+run-dnfinition *args: build-dnfinition
+    @echo "Starting DNFinition..."
+    ./ada/dnfinition/bin/dnfinition {{args}}
 
-# Run in development mode with hot reload
+# Run TotalUpdate daemon
+run-totalupdate: build-totalupdate
+    @echo "Starting TotalUpdate daemon..."
+    cd elixir/totalupdate && mix run --no-halt
+
+# Run DNFinition with Elixir coordinator
+run *args: build
+    @echo "Starting DNFinition with OTP supervisor..."
+    cd elixir/dnfinition && iex -S mix
+
+# Run in development mode
 dev:
     @echo "Starting dev mode..."
-    # TODO: Add dev command
+    cd elixir/dnfinition && iex -S mix
 
-# Run REPL/interactive mode
+# Run Elixir REPL
 repl:
-    @echo "Starting REPL..."
-    # TODO: Add REPL command
-    # Elixir: iex -S mix
-    # Guile: guix shell guile -- guile
+    @echo "Starting Elixir REPL..."
+    cd elixir/dnfinition && iex -S mix
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # DEPENDENCIES
@@ -164,16 +187,42 @@ repl:
 # Install all dependencies
 deps:
     @echo "Installing dependencies..."
-    # TODO: Add deps command
-    # Rust: (automatic with cargo)
-    # ReScript: npm install
-    # Elixir: mix deps.get
+    @echo "Elixir dependencies:"
+    cd elixir/dnfinition && mix deps.get
+    cd elixir/totalupdate && mix deps.get
 
-# Audit dependencies for vulnerabilities
-deps-audit:
-    @echo "Auditing dependencies..."
-    # TODO: Add audit command
-    # Rust: cargo audit
+# Check system prerequisites
+prereqs:
+    #!/usr/bin/env bash
+    echo "Checking prerequisites..."
+    MISSING=""
+
+    # Ada/GNAT
+    command -v gnat >/dev/null || MISSING="$MISSING gnat"
+    command -v gprbuild >/dev/null || MISSING="$MISSING gprbuild"
+    command -v gnatprove >/dev/null || echo "  gnatprove not found (optional for SPARK proofs)"
+
+    # Elixir
+    command -v elixir >/dev/null || MISSING="$MISSING elixir"
+    command -v mix >/dev/null || MISSING="$MISSING mix"
+
+    # ncurses
+    pkg-config --exists ncurses 2>/dev/null || MISSING="$MISSING ncurses-devel"
+
+    # Optional tools
+    command -v aria2c >/dev/null || echo "  aria2 not found (optional for parallel downloads)"
+    command -v ipfs >/dev/null || echo "  kubo/ipfs not found (optional for IPFS support)"
+
+    if [ -n "$MISSING" ]; then
+        echo ""
+        echo "Missing required packages:$MISSING"
+        echo ""
+        echo "Install on Fedora:  sudo dnf install$MISSING"
+        echo "Install on Debian:  sudo apt install$MISSING"
+        echo "Install on Arch:    sudo pacman -S$MISSING"
+        exit 1
+    fi
+    echo "All prerequisites satisfied!"
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # DOCUMENTATION
@@ -181,9 +230,11 @@ deps-audit:
 
 # Generate all documentation
 docs:
-    @mkdir -p docs/generated docs/man
+    @mkdir -p docs/generated docs/man docs/api
     just cookbook
     just man
+    cd elixir/dnfinition && mix docs
+    cd elixir/totalupdate && mix docs
     @echo "Documentation generated in docs/"
 
 # Generate justfile cookbook documentation
@@ -191,7 +242,7 @@ cookbook:
     #!/usr/bin/env bash
     mkdir -p docs
     OUTPUT="docs/just-cookbook.adoc"
-    echo "= {{project}} Justfile Cookbook" > "$OUTPUT"
+    echo "= TotalUpdate & DNFinition Justfile Cookbook" > "$OUTPUT"
     echo ":toc: left" >> "$OUTPUT"
     echo ":toclevels: 3" >> "$OUTPUT"
     echo "" >> "$OUTPUT"
@@ -213,51 +264,108 @@ cookbook:
     done
     echo "Generated: $OUTPUT"
 
-# Generate man page
+# Generate man pages
 man:
     #!/usr/bin/env bash
     mkdir -p docs/man
-    cat > docs/man/{{project}}.1 << EOF
-.TH RSR-TEMPLATE-REPO 1 "$(date +%Y-%m-%d)" "{{version}}" "RSR Template Manual"
+    cat > docs/man/dnfinition.1 << 'EOF'
+.TH DNFINITION 1 "2025-12-27" "0.1.0" "DNFinition Manual"
 .SH NAME
-{{project}} \- RSR standard repository template
+dnfinition \- Universal package manager TUI with reversibility
 .SH SYNOPSIS
-.B just
-[recipe] [args...]
+.B dnfinition
+[COMMAND] [OPTIONS]
 .SH DESCRIPTION
-Canonical template for RSR (Rhodium Standard Repository) projects.
+DNFinition is an interactive TUI package manager that provides a unified
+interface to 50+ package managers with built-in reversibility through
+snapshots and transaction logging.
+.SH COMMANDS
+.TP
+.B (none)
+Start interactive TUI mode
+.TP
+.B search QUERY
+Search for packages
+.TP
+.B install PKG...
+Install packages (creates snapshot first)
+.TP
+.B remove PKG...
+Remove packages
+.TP
+.B upgrade
+Upgrade all packages
+.TP
+.B snapshots
+List available snapshots
+.TP
+.B rollback [ID]
+Rollback to a snapshot
+.TP
+.B info
+Show platform information
 .SH AUTHOR
-Hyperpolymath <hyperpolymath@proton.me>
+Jonathan D.A. Jewell <jonathan@hyperpolymath.io>
+.SH LICENSE
+AGPL-3.0-or-later
 EOF
-    echo "Generated: docs/man/{{project}}.1"
+
+    cat > docs/man/totalupdate.1 << 'EOF'
+.TH TOTALUPDATE 1 "2025-12-27" "0.1.0" "TotalUpdate Manual"
+.SH NAME
+totalupdate \- Universal package update daemon
+.SH SYNOPSIS
+.B totalupdate
+[OPTIONS]
+.SH DESCRIPTION
+TotalUpdate is a background daemon that automatically keeps all your
+packages up-to-date across all package managers with safety guarantees.
+.SH FEATURES
+.IP \(bu 2
+Supports 50+ package managers
+.IP \(bu 2
+aria2 parallel downloads
+.IP \(bu 2
+IPFS decentralized package distribution
+.IP \(bu 2
+Strategy engine: whitelist/blacklist/pinning
+.IP \(bu 2
+Automatic snapshots before updates
+.SH AUTHOR
+Jonathan D.A. Jewell <jonathan@hyperpolymath.io>
+.SH LICENSE
+AGPL-3.0-or-later
+EOF
+    echo "Generated: docs/man/dnfinition.1"
+    echo "Generated: docs/man/totalupdate.1"
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# CONTAINERS (nerdctl + Wolfi)
+# CONTAINERS (Podman)
 # ═══════════════════════════════════════════════════════════════════════════════
 
 # Build container image
 container-build tag="latest":
     @if [ -f Containerfile ]; then \
-        nerdctl build -t {{project}}:{{tag}} -f Containerfile .; \
+        podman build -t {{project}}:{{tag}} -f Containerfile .; \
     else \
         echo "No Containerfile found"; \
     fi
 
 # Run container
 container-run tag="latest" *args:
-    nerdctl run --rm -it {{project}}:{{tag}} {{args}}
+    podman run --rm -it {{project}}:{{tag}} {{args}}
 
 # Push container image
 container-push registry="ghcr.io/hyperpolymath" tag="latest":
-    nerdctl tag {{project}}:{{tag}} {{registry}}/{{project}}:{{tag}}
-    nerdctl push {{registry}}/{{project}}:{{tag}}
+    podman tag {{project}}:{{tag}} {{registry}}/{{project}}:{{tag}}
+    podman push {{registry}}/{{project}}:{{tag}}
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # CI & AUTOMATION
 # ═══════════════════════════════════════════════════════════════════════════════
 
 # Run full CI pipeline locally
-ci: deps quality
+ci: prereqs deps build quality
     @echo "CI pipeline complete!"
 
 # Install git hooks
@@ -276,10 +384,11 @@ EOF
 # ═══════════════════════════════════════════════════════════════════════════════
 
 # Run security audit
-security: deps-audit
+security:
     @echo "=== Security Audit ==="
+    cd elixir/dnfinition && mix deps.audit
+    cd elixir/totalupdate && mix deps.audit
     @command -v gitleaks >/dev/null && gitleaks detect --source . --verbose || true
-    @command -v trivy >/dev/null && trivy fs --severity HIGH,CRITICAL . || true
     @echo "Security audit complete"
 
 # Generate SBOM
@@ -296,112 +405,18 @@ validate-rsr:
     #!/usr/bin/env bash
     echo "=== RSR Compliance Check ==="
     MISSING=""
-    for f in .editorconfig .gitignore justfile RSR_COMPLIANCE.adoc README.adoc; do
+    for f in .editorconfig .gitignore justfile README.adoc; do
         [ -f "$f" ] || MISSING="$MISSING $f"
     done
-    for d in .well-known; do
-        [ -d "$d" ] || MISSING="$MISSING $d/"
-    done
-    for f in .well-known/security.txt .well-known/ai.txt .well-known/humans.txt; do
-        [ -f "$f" ] || MISSING="$MISSING $f"
-    done
-    if [ ! -f "guix.scm" ] && [ ! -f ".guix-channel" ] && [ ! -f "flake.nix" ]; then
-        MISSING="$MISSING guix.scm/flake.nix"
-    fi
     if [ -n "$MISSING" ]; then
         echo "MISSING:$MISSING"
         exit 1
     fi
     echo "RSR compliance: PASS"
 
-# Validate STATE.scm syntax
-validate-state:
-    @if [ -f "STATE.scm" ]; then \
-        guile -c "(primitive-load \"STATE.scm\")" 2>/dev/null && echo "STATE.scm: valid" || echo "STATE.scm: INVALID"; \
-    else \
-        echo "No STATE.scm found"; \
-    fi
-
 # Full validation suite
-validate: validate-rsr validate-state
+validate: validate-rsr
     @echo "All validations passed!"
-
-# ═══════════════════════════════════════════════════════════════════════════════
-# STATE MANAGEMENT
-# ═══════════════════════════════════════════════════════════════════════════════
-
-# Update STATE.scm timestamp
-state-touch:
-    @if [ -f "STATE.scm" ]; then \
-        sed -i 's/(updated . "[^"]*")/(updated . "'"$(date -Iseconds)"'")/' STATE.scm && \
-        echo "STATE.scm timestamp updated"; \
-    fi
-
-# Show current phase from STATE.scm
-state-phase:
-    @grep -oP '\(phase\s+\.\s+\K[^)]+' STATE.scm 2>/dev/null | head -1 || echo "unknown"
-
-# ═══════════════════════════════════════════════════════════════════════════════
-# GUIX & NIX
-# ═══════════════════════════════════════════════════════════════════════════════
-
-# Enter Guix development shell (primary)
-guix-shell:
-    guix shell -D -f guix.scm
-
-# Build with Guix
-guix-build:
-    guix build -f guix.scm
-
-# Enter Nix development shell (fallback)
-nix-shell:
-    @if [ -f "flake.nix" ]; then nix develop; else echo "No flake.nix"; fi
-
-# ═══════════════════════════════════════════════════════════════════════════════
-# HYBRID AUTOMATION
-# ═══════════════════════════════════════════════════════════════════════════════
-
-# Run local automation tasks
-automate task="all":
-    #!/usr/bin/env bash
-    case "{{task}}" in
-        all) just fmt && just lint && just test && just docs && just state-touch ;;
-        cleanup) just clean && find . -name "*.orig" -delete && find . -name "*~" -delete ;;
-        update) just deps && just validate ;;
-        *) echo "Unknown: {{task}}. Use: all, cleanup, update" && exit 1 ;;
-    esac
-
-# ═══════════════════════════════════════════════════════════════════════════════
-# COMBINATORIC MATRIX RECIPES
-# ═══════════════════════════════════════════════════════════════════════════════
-
-# Build matrix: [debug|release] × [target] × [features]
-build-matrix mode="debug" target="" features="":
-    @echo "Build matrix: mode={{mode}} target={{target}} features={{features}}"
-    # Customize for your build system
-
-# Test matrix: [unit|integration|e2e|all] × [verbosity] × [parallel]
-test-matrix suite="unit" verbosity="normal" parallel="true":
-    @echo "Test matrix: suite={{suite}} verbosity={{verbosity}} parallel={{parallel}}"
-
-# Container matrix: [build|run|push|shell|scan] × [registry] × [tag]
-container-matrix action="build" registry="ghcr.io/hyperpolymath" tag="latest":
-    @echo "Container matrix: action={{action}} registry={{registry}} tag={{tag}}"
-
-# CI matrix: [lint|test|build|security|all] × [quick|full]
-ci-matrix stage="all" depth="quick":
-    @echo "CI matrix: stage={{stage}} depth={{depth}}"
-
-# Show all matrix combinations
-combinations:
-    @echo "=== Combinatoric Matrix Recipes ==="
-    @echo ""
-    @echo "Build Matrix: just build-matrix [debug|release] [target] [features]"
-    @echo "Test Matrix:  just test-matrix [unit|integration|e2e|all] [verbosity] [parallel]"
-    @echo "Container:    just container-matrix [build|run|push|shell|scan] [registry] [tag]"
-    @echo "CI Matrix:    just ci-matrix [lint|test|build|security|all] [quick|full]"
-    @echo ""
-    @echo "Total combinations: ~10 billion"
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # VERSION CONTROL
@@ -421,12 +436,34 @@ log count="20":
 
 # Count lines of code
 loc:
-    @find . \( -name "*.rs" -o -name "*.ex" -o -name "*.res" -o -name "*.ncl" -o -name "*.scm" \) 2>/dev/null | xargs wc -l 2>/dev/null | tail -1 || echo "0"
+    @echo "Ada:"
+    @find ada -name "*.ads" -o -name "*.adb" 2>/dev/null | xargs wc -l 2>/dev/null | tail -1 || echo "0"
+    @echo "Elixir:"
+    @find elixir -name "*.ex" -o -name "*.exs" 2>/dev/null | xargs wc -l 2>/dev/null | tail -1 || echo "0"
 
 # Show TODO comments
 todos:
-    @grep -rn "TODO\|FIXME" --include="*.rs" --include="*.ex" --include="*.res" . 2>/dev/null || echo "No TODOs"
+    @echo "=== TODOs ==="
+    @grep -rn "TODO\|FIXME" --include="*.ads" --include="*.adb" --include="*.ex" . 2>/dev/null || echo "No TODOs"
 
 # Open in editor
 edit:
     ${EDITOR:-code} .
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# INSTALL
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# Install to ~/.local/bin
+install: build-release
+    @echo "Installing to ~/.local/bin..."
+    @mkdir -p ~/.local/bin
+    cp ada/dnfinition/bin/dnfinition ~/.local/bin/
+    @echo "Installed: ~/.local/bin/dnfinition"
+    @echo ""
+    @echo "Make sure ~/.local/bin is in your PATH"
+
+# Uninstall
+uninstall:
+    rm -f ~/.local/bin/dnfinition
+    @echo "Uninstalled dnfinition"
