@@ -4,7 +4,7 @@
 ;;; STATE.scm - Project State & Configuration
 ;;; This file tracks the current state of the TotalUpdate & DNFinition project
 
-(define-module (total-upgrade state)
+(define-module (total-update state)
   #:export (project-state
             component-status
             implementation-status))
@@ -18,6 +18,9 @@
     (version . "0.1.0")
     (status . "alpha")
     (license . "AGPL-3.0-or-later")
+    (mission . "TotalUpdate prevents missed patches; DNFinition provides a universal PM/TUI")
+    (standalone . "Both tools are standalone and can be combined")
+    (egress-checker . "Idris2 policy gate")
 
     ;; Architecture
     (architecture

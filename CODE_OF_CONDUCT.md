@@ -290,7 +290,7 @@ We thank these communities for their leadership in creating welcoming spaces.
 
 If you have questions about this Code of Conduct:
 
-- Open a [Discussion](https://github.com/hyperpolymath/total-upgrade/discussions) (for general questions)
+- Open a [Discussion](https://github.com/hyperpolymath/total-update/discussions) (for general questions)
 - Email conduct@hyperpolymath.io (for private questions)
 - Contact any maintainer directly
 

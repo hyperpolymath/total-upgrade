@@ -47,6 +47,13 @@ defmodule DNFinition.TransactionLog do
   end
 
   @doc """
+  Emit a placement decision audit event.
+  """
+  def log_placement_decision(decision) do
+    DNFinition.Audit.emit_placement_decision(decision)
+  end
+
+  @doc """
   Get transaction history.
   """
   def history(limit \\ 50) do

@@ -1,0 +1,85 @@
+= Personal-Sysadmin Handoff Prompt (Draft)
+:toc: left
+:toclevels: 2
+:icons: font
+
+This document defines a prompt package to hand off placement decisions to the
+Personal-Sysadmin agent in AmbientOps. The goal is to provide enough context
+to make an informed recommendation without overloading the user.
+
+== Purpose
+
+When placement is ambiguous or user intent conflicts with policy, the satellite
+tool should generate a structured prompt for Personal-Sysadmin to advise.
+
+== Required Context Fields
+
+* *Host profile*: OS, immutable/mutable, snapshot support, network status
+* *Package identity*: name, type (app/tool/service), vendor, license
+* *User intent*: goal, constraints, urgency, acceptable risk level
+* *Candidates*: list of surfaces considered
+* *Scores*: weighted criteria results per candidate
+* *Profile*: zero trace, state vault, or multi-version isolation
+* *Tags*: container/VM/distroless/Wolfi and scope tags per candidate
+* *Candidate metadata*: container image or other surface details
+* *Policy notes*: triggered constraints, existing overrides
+* *Cost risk*: paid upgrade potential or licensing risk
+* *Dry run output*: summary of what would change
+* *State vault*: configured path for retained config/state
+
+== Prompt Template
+
+[source,text]
+----
+You are Personal-Sysadmin. Recommend placement for the package below.
+
+Host profile:
+- OS: {{os}}
+- Immutable: {{immutable}}
+- Snapshot support: {{snapshots}}
+- Network: {{network}}
+
+Package:
+- ID: {{package_id}}
+- Intent: {{intent}}
+- Vendor: {{vendor}}
+- License: {{license}}
+
+User intent:
+- Goal: {{goal}}
+- Constraints: {{constraints}}
+- Urgency: {{urgency}}
+- Risk tolerance: {{risk_tolerance}}
+
+Candidates and scores:
+{{candidates_table}}
+
+Profile and tags:
+- Profile: {{profile}}
+- Tags: {{candidate_tags}}
+- Candidate metadata: {{candidate_meta}}
+
+Policy notes:
+- Hard constraints: {{policy_constraints}}
+- Existing overrides: {{policy_overrides}}
+
+Cost risk:
+- {{cost_risk}}
+
+Dry run summary:
+{{dry_run_summary}}
+
+State vault:
+{{state_vault_path}}
+
+Please recommend a placement surface and explain why, noting any risks or
+follow-up actions needed.
+----
+
+== Suggested Output Fields
+
+* recommended_surface
+* rationale
+* risk_notes
+* follow_up_actions
+* override_needed (true/false)

@@ -202,6 +202,43 @@
 
 ---
 
+=== Placement Engine Expansion
+
+* [x] Linux/Minix auto-collector with WSL detection
+* [ ] BSD auto-collector (FreeBSD/OpenBSD/NetBSD)
+* [ ] Unix-like auto-collector (illumos/Solaris)
+* [ ] Per-distro policy constraints and scoring profiles
+* [ ] macOS auto-collector (Homebrew/MacPorts + OS context)
+* [ ] Windows auto-collector (winget/Chocolatey/Scoop + OS context)
+* [ ] iOS/Android compatibility scope (package surfaces + constraints)
+* [ ] Architecture metadata (x86_64, arm64, riscv64)
+
+---
+
+=== Production Guardrails
+
+* [ ] Minimal rollback guard (snapshot or state vault) required for production
+* [ ] Total Recall integration for full recovery workflows
+
+---
+
+=== Micropatching (v2.0)
+
+Principles:
+
+* Prefer full patches whenever possible
+* Use micropatching only for uptime-critical scenarios
+* Never auto-enable paid services without explicit opt-in
+* Always log as a temporary mitigation, not a final fix
+
+Potential paths:
+
+* eBPF runtime mitigations (Linux)
+* Livepatch mechanisms (kpatch/kGraft, kernel livepatch)
+* Userspace shims (LD_PRELOAD) for narrow cases
+
+---
+
 === Phase 5: Language Package Managers
 
 ==== JavaScript/TypeScript

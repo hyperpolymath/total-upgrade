@@ -1,0 +1,52 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "PlacementDecision",
+  "type": "object",
+  "properties": {
+    "operation_id": {"type": "string"},
+    "package_id": {"type": "string"},
+    "intent": {"type": "string"},
+    "profile": {"type": "string"},
+    "candidates": {"type": "array", "items": {"type": "string"}},
+    "candidate_tags": {
+      "type": "object",
+      "additionalProperties": {"type": "array", "items": {"type": "string"}}
+    },
+    "candidate_meta": {
+      "type": "object",
+      "additionalProperties": {"type": "object"}
+    },
+    "scores": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": {"type": "number"}
+      }
+    },
+    "environment": {
+      "type": "object",
+      "properties": {
+        "os_family": {"type": "string"},
+        "os_name": {"type": "string"},
+        "os_like": {"type": "string"},
+        "wsl": {"type": "boolean"},
+        "container": {"type": "boolean"},
+        "virtual_machine": {"type": "boolean"},
+        "minix": {"type": "boolean"}
+      },
+      "additionalProperties": {"type": ["string", "number", "boolean"]}
+    },
+    "selected_surface": {"type": ["string", "null"]},
+    "constraints": {"type": "array", "items": {"type": "string"}},
+    "user_override": {"type": "boolean"},
+    "override_reason": {"type": ["string", "null"]},
+    "cost_risk": {"type": "string"},
+    "dry_run": {"type": "boolean"},
+    "result": {"type": "string"},
+    "state_vault_path": {"type": ["string", "null"]},
+    "state_vault_entry": {"type": ["string", "null"]},
+    "state_vault_manifest": {"type": ["array", "null"]}
+  },
+  "required": ["operation_id", "package_id", "intent", "candidates", "selected_surface"],
+  "additionalProperties": true
+}

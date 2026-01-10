@@ -1,4 +1,4 @@
-= TotalUpdate & DNFinition
+= TotalUpdate (with DNFinition)
 
 image:https://img.shields.io/badge/license-AGPL--3.0-blue.svg[AGPL-3.0,link="https://www.gnu.org/licenses/agpl-3.0"] image:https://img.shields.io/badge/philosophy-Palimpsest-purple.svg[Palimpsest,link="https://github.com/hyperpolymath/palimpsest-licence"]
 :toc: left
@@ -6,21 +6,66 @@ image:https://img.shields.io/badge/license-AGPL--3.0-blue.svg[AGPL-3.0,link="htt
 :icons: font
 :source-highlighter: rouge
 
-Universal package management with formal verification and built-in reversibility.
+TotalUpdate is a safety-focused updater: no system should be breached because
+an available patch was not applied.
+DNFinition is a standalone universal package manager/TUI used by TotalUpdate
+but also usable on its own.
 
 == Overview
 
-This repository contains two complementary tools:
+This repository contains two complementary but *standalone* tools:
 
-*TotalUpdate*:: Automated background daemon for keeping everything up-to-date across all package managers
-*DNFinition*:: Interactive TUI package manager with reversibility (like nala/aptitude for all package managers)
+*TotalUpdate*:: Automated, safety-focused updater across package managers
+*DNFinition*:: Interactive universal package manager with reversibility (nala/aptitude-style)
+
+== Standalone + Combinations
+
+* Install TotalUpdate alone for "never miss a patch" assurance
+* Install DNFinition alone for a universal PM/TUI
+* Combine for end-to-end safety (audit + reversibility)
+* Combine with Total Recall for rollback guardrails
+* Combine with feedback-a-tron for privacy-gated sharing
+* No bundle required: install only what you need
 
 Both are written in *Ada 2022* (TUI, formal verification) + *Elixir/OTP* (daemon, orchestration), designed for safety-critical package management.
+
+== asdf Interoperability Policy
+
+TotalUpdate integrates with asdf without taking over or modifying the asdf ecosystem.
+
+* Uses asdf only when installed and explicitly enabled
+* Reads `.tool-versions` to detect toolchains
+* Does not install or upgrade plugins by default
+* Does not modify asdf registry or plugin sources
+* Logs all asdf operations for audit and rollback
+* Offers opt-in write-back and automation
 
 == Project Status
 
 [cols="1,3"]
 |===
+
+== Production Guardrails
+
+TotalUpdate should ship with a minimal rollback guard (snapshot or state vault)
+to preserve trust if an update causes regressions. Total Recall provides the
+full recovery workflow, but a minimal guard is required for early production.
+
+== Micropatching (v2.0)
+
+Micropatching is planned as an opt-in, uptime-focused mitigation.
+Full patches remain the default, and paid services require explicit consent.
+
+== Privacy-Gated Dependency Checks
+
+TotalUpdate will generate dependency and compatibility reports and place them
+in the feedback-a-tron outbox for user review. Nothing is submitted externally
+until the user approves or redacts it.
+
+== Idris2 Policy Gate
+
+Outbound payloads are validated by the AmbientOps Idris2 checker before any
+egress. See `docs/IDRIS2_INTEGRATION.adoc`.
 |Phase |Foundation Development
 |Version |0.1.0
 |License |AGPL-3.0-or-later

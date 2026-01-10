@@ -47,6 +47,12 @@ defmodule DNFinition.MixProject do
       # Telemetry for observability
       {:telemetry, "~> 1.2"},
 
+      # JSON for audit event encoding
+      {:jason, "~> 1.4"},
+
+      # JSON schema validation
+      {:ex_json_schema, "~> 0.9"},
+
       # Development and testing
       {:dialyxir, "~> 1.4", only: [:dev], runtime: false},
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},

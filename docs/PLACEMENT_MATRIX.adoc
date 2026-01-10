@@ -1,0 +1,252 @@
+= Placement Decision Matrix (Kinoite Phase 1)
+:toc: left
+:toclevels: 2
+:icons: font
+
+This document defines how a standalone satellite tool makes smart, auditable
+placement decisions on Fedora Kinoite. It starts as a host-local policy engine
+and audit schema, with a path to networked use later.
+
+== Scope
+
+Phase 1 focuses on:
+
+* Enumerating installation surfaces on Kinoite
+* Scoring candidates with a consistent decision matrix
+* Recording decisions in a structured audit log
+* Allowing explicit user intent overrides with reasons
+
+== Installation Surfaces (Kinoite)
+
+The tool should treat these as first-class targets:
+
+* *rpm-ostree host (base deployment)*: OS updates, kernel, drivers, system libs
+* *rpm-ostree layered RPMs*: host layering for a few critical packages
+* *Flatpak (system or user)*: GUI apps and their runtimes
+* *Toolbox (Fedora)*: mutable dev tools, CLI utilities
+* *Distrobox (any distro)*: mutable apps/tools requiring other distros
+* *Podman/OCI containers*: services or isolated apps
+* *AppImage*: portable user-space binaries
+* *asdf*: language runtimes and toolchains per-user
+* *Language PMs (project or user scope)*: pip/pipx/poetry, npm/pnpm/yarn, cargo, gem, go, etc
+* *Nix/Guix* (if present): declarative, reversible user installs
+* *Homebrew* (if present): user-space CLI tools
+* *Firmware updates*: fwupd/LVFS
+
+== Decision Criteria
+
+Each candidate surface is scored per criterion (0-5), then weighted.
+
+[cols="2,1,4"]
+|===
+|Criterion |Weight |Definition
+
+|Dependability |3 |Likelihood of consistent install/upgrade behavior
+|Security |4 |Isolation, provenance, update hygiene, attack surface
+|Interoperability |3 |Integration with OS, desktop, PATH, portals, services
+|Functional Fit |4 |Does the surface naturally match the app/tool type
+|Containability |4 |Ability to isolate and tightly bound the runtime
+|Performance |2 |Runtime performance and startup overhead
+|Efficiency |2 |Storage and update footprint
+|Reversibility |3 |Rollback, snapshots, or generation support
+|Clean Removal |3 |Ability to remove without leftovers or state bleed
+|State Retention |2 |Ability to retain user state in a central place
+|Auditability |3 |Ability to log and reproduce actions
+|Cost Risk |2 |Likelihood of paid upgrade or license friction
+|===
+
+Weights can be tuned by policy profiles (conservative/aggressive/manual).
+
+== Baseline Rules (Kinoite Defaults)
+
+These are hard constraints before scoring:
+
+* *Kernel modules, drivers, system services* -> rpm-ostree host only
+* *Desktop GUI apps* -> Flatpak unless a strong exception exists
+* *Dev toolchains* -> toolbox/distrobox/asdf before host layering
+* *System-wide CLI utilities* -> toolbox or /usr/local unless required by host
+* *Project-scoped dependencies* -> language PM inside project
+* *Network services* -> nerdctl/podman/OCI unless host service is required
+* *Firmware* -> fwupd only
+* *Containment preference* -> container or VM before host install
+* *Distroless preference* -> distroless base image when possible
+* *Wolfi fallback* -> Wolfi base image when distroless is not viable
+
+== Reversibility and Cleanup Profiles
+
+These profiles influence scoring and audit notes:
+
+* *Zero trace*: prefer immutable or containerized installs, purge residual config
+* *State vault*: centralize config/state in a managed location for restoration
+* *Multi-version isolation*: keep parallel versions via containers, toolchains, or
+  user-scoped paths
+
+State vault uses a configured path to retain user-owned config/state even when
+the install surface is removed.
+
+If `profile` is `state_vault` and `state_paths` are provided, the engine records
+a manifest and (when not a dry run) copies those paths into the vault.
+
+== Candidate Tags
+
+Surfaces can carry tags to influence selection:
+
+* `container`, `vm`, `toolbox`, `distrobox`
+* `distroless`, `wolfi`
+* `mutable`, `immutable`
+* `user_scope`, `system_scope`
+
+== User Intent Overrides
+
+Overrides are allowed but must be audited with a reason:
+
+* "Need systemd integration"
+* "Require kernel module"
+* "Corporate policy: host-only"
+* "Air-gapped constraint"
+* "Performance-critical"
+
+== Example Scoring (GUI App)
+
+[cols="2,1,1,1,1,1,1,1,1,1,1"]
+|===
+|Surface |Dep |Sec |Interop |Fit |Perf |Eff |Rev |Audit |Cost |Total
+
+|Flatpak (user) |5|4|4|5|3|4|4|4|3|*86*
+|rpm-ostree layered |3|3|5|3|5|2|2|4|4|*70*
+|AppImage |2|2|2|3|4|3|1|2|2|*51*
+|===
+
+Totals reflect weightings; these are illustrative defaults.
+
+== Audit Schema (JSONL)
+
+All placement decisions are emitted as audit events.
+
+Required fields:
+
+* `event_type`: `placement_decision`
+* `timestamp`: RFC3339
+* `host_id`: hostname or stable ID
+* `operation_id`: stable ID for the decision
+* `package_id`: canonical identifier
+* `intent`: `gui_app|cli_tool|service|toolchain|library|firmware|other`
+* `profile`: `zero_trace|state_vault|multi_version|default`
+* `candidates`: list of surfaces considered
+* `candidate_tags`: map of surface -> list of tags
+* `candidate_meta`: map of surface -> metadata (image, scope, notes)
+* `scores`: map of surface -> criterion scores + total
+* `selected_surface`
+* `constraints`: hard rules triggered
+* `user_override`: boolean
+* `override_reason`: string or null
+* `cost_risk`: `none|low|medium|high`
+* `dry_run`: boolean
+* `result`: `accepted|rejected|deferred`
+* `state_vault_path`: string or null
+* `state_vault_entry`: string or null
+* `state_vault_manifest`: list or null
+
+Example:
+
+[source,json]
+----
+{
+  "event_type": "placement_decision",
+  "timestamp": "2025-01-05T14:31:02Z",
+  "host_id": "kinoite-01",
+  "operation_id": "op_20250105_143102_01",
+  "package_id": "org.mozilla.Firefox",
+  "intent": "gui_app",
+  "profile": "zero_trace",
+  "candidates": ["flatpak_user", "rpm_ostree_layered", "appimage"],
+  "candidate_tags": {
+    "flatpak_user": ["user_scope"],
+    "rpm_ostree_layered": ["system_scope"],
+    "appimage": ["user_scope"]
+  },
+  "candidate_meta": {},
+  "scores": {
+    "flatpak_user": {
+      "dependability": 5,
+      "security": 4,
+      "interoperability": 4,
+      "functional_fit": 5,
+      "performance": 3,
+      "efficiency": 4,
+      "reversibility": 4,
+      "auditability": 4,
+      "cost_risk": 3,
+      "total": 86
+    }
+  },
+  "selected_surface": "flatpak_user",
+  "constraints": ["gui_app_prefers_flatpak"],
+  "user_override": false,
+  "override_reason": null,
+  "cost_risk": "low",
+  "dry_run": true,
+  "result": "accepted",
+  "state_vault_path": null,
+  "state_vault_entry": null,
+  "state_vault_manifest": null
+}
+----
+
+== Kinoite-Specific Data Sources
+
+These are used to populate audit context:
+
+* `rpm-ostree status --json` for host deployment and layers
+* `flatpak list --columns=app` for app inventory
+* `toolbox list` and `distrobox list` for container inventory
+* `podman ps --all --format ...` for service/container inventory
+* `asdf current` or `.tool-versions` for toolchain inventory
+
+== Input/Output Schema
+
+* Input schema: `docs/placement_input.schema.json`
+* Decision schema: `docs/placement_decision.schema.json`
+
+== Kinoite Auto-Collector
+
+The CLI can auto-populate candidates and baseline scores via `--kinoite-auto`.
+
+== Linux/Minix Auto-Collector (Including WSL)
+
+The CLI can auto-populate candidates and baseline scores via `--linux-auto`,
+and annotates the environment with `wsl: true|false`.
+
+Environment fields include `os_family`, `os_name`, `os_like`, `wsl`, `container`,
+`virtual_machine`, and `minix` when available.
+
+== BSD Auto-Collector
+
+The CLI can auto-populate candidates and baseline scores via `--bsd-auto`.
+
+== Unix Auto-Collector (illumos/Solaris)
+
+The CLI can auto-populate candidates and baseline scores via `--unix-auto`.
+
+== Telemetry Events
+
+* `[:dnfinition, :placement, :decision]` emits on every decision
+* `[:dnfinition, :placement, :state_vault]` emits when state vault capture runs
+
+== Unmanaged Detection
+
+Use `mix dnfinition.unmanaged_scan` to detect installs outside known package
+managers. Add `--suggest` for guided upgrade routes, including inferred origins
+like `pipx`, `cargo`, and `asdf`, with confidence and evidence fields.
+
+== Feedback Outbox (Privacy Gateway)
+
+All audit events are copied to the feedback-a-tron outbox at
+`~/.local/state/feedback-a-tron/inbox/ambientops.jsonl` by default. Users choose
+what leaves the system from there.
+
+== Next Steps
+
+* Implement a minimal audit emitter (JSONL) for placement decisions
+* Add a policy configuration file for weights and constraints
+* Connect to existing transaction log modules in DNFinition/TotalUpdate

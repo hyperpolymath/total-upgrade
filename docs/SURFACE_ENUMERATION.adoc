@@ -1,0 +1,153 @@
+== Package Surface Enumeration (Phase 1)
+:toc: left
+:toclevels: 2
+:icons: font
+
+This document enumerates installation/update surfaces per OS family. It is the
+source of truth for "what is an install surface" before scoring and policy.
+
+Legend:
+
+* *System PM* = OS package manager
+* *Universal* = cross-distro app formats
+* *Language* = language tool/package managers
+* *Dev Tools* = toolchain/version managers
+* *Containers/VMs* = isolation surfaces
+* *Firmware* = device firmware updates
+
+== Linux (All distros, including WSL)
+
+=== System PM
+* apt, apt-get, dpkg (Debian/Ubuntu)
+* dnf, yum (Fedora/RHEL)
+* rpm-ostree (immutable Fedora/RHEL variants)
+* zypper (openSUSE)
+* pacman (Arch)
+* apk (Alpine)
+* xbps (Void)
+* portage/emerge (Gentoo)
+
+=== Universal
+* Flatpak
+* Snap
+* AppImage
+
+=== Language
+* Python: pip, pipx, poetry, conda/mamba
+* Node.js: npm, yarn, pnpm, bun
+* Rust: cargo, rustup
+* Go: go install/modules
+* Ruby: gem, bundler
+* PHP: composer
+* Java: sdkman, maven/gradle wrappers
+* .NET: dotnet tool
+* Haskell: cabal, stack, ghcup
+* OCaml: opam
+* Elixir/Erlang: mix, rebar3, asdf plugins
+
+=== Dev Tools
+* asdf
+* nix, guix (if present)
+* homebrew (linuxbrew)
+
+=== Containers/VMs
+* podman, docker, nerdctl
+* toolbox, distrobox
+* systemd-nspawn
+* LXC/LXD
+* KVM/QEMU, virt-manager
+
+=== Firmware
+* fwupd/LVFS
+
+== BSD (FreeBSD/OpenBSD/NetBSD)
+
+=== System PM
+* pkg (FreeBSD)
+* pkg_add (OpenBSD)
+* pkgin (NetBSD)
+* ports/portmaster (FreeBSD)
+
+=== Universal
+* Flatpak (if available)
+* AppImage (if supported)
+
+=== Language
+* Same as Linux where tools exist
+
+=== Dev Tools
+* nix, guix (if present)
+
+=== Containers/VMs
+* bhyve (FreeBSD)
+* jails (FreeBSD)
+* qemu (if installed)
+
+== Unix (illumos/Solaris)
+
+=== System PM
+* pkg (IPS)
+* pkgadd
+
+=== Language
+* Same as Linux where tools exist
+
+=== Dev Tools
+* nix, guix (if present)
+
+=== Containers/VMs
+* zones (illumos/Solaris)
+
+== macOS
+
+=== System PM
+* softwareupdate (system updates)
+
+=== Universal
+* App bundles (.app)
+* dmg/pkg installers
+
+=== Dev Tools
+* Homebrew
+* MacPorts
+* asdf
+* nix, guix (if present)
+
+=== Language
+* Same as Linux where tools exist
+
+== Windows
+
+=== System PM
+* winget
+* Chocolatey
+* Scoop
+* MSIX
+
+=== Universal
+* MSI installers
+* Portable EXEs
+
+=== Dev Tools
+* asdf (via WSL)
+* nix, guix (if present)
+
+=== Language
+* Same as Linux where tools exist, plus
+* pyenv-win
+* rustup (Windows)
+
+== Mobile (iOS/Android) - Scope Placeholder
+
+=== System PM
+* iOS App Store / MDM
+* Android Play Store / F-Droid / OEM stores
+
+=== Dev Tools
+* adb-based installs (Android)
+
+== Architecture Targets
+
+* x86_64
+* arm64/aarch64 (including Apple M-series)
+* riscv64
